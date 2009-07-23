@@ -20,21 +20,11 @@ with qw/Fuse::Template::Sys/;
 
 =head1 ATTRIBUTES
 
-=head2 debug
-
- $bool = $self->debug;
-
-=cut
-
-has debug => (
-    is => 'ro',
-    isa => 'Bool',
-    default => 0,
-);
-
 =head2 mountpoint
 
  $path = $self->mountpoint;
+
+Path to where the filesystem should be mounted.
 
 Required.
 
@@ -60,9 +50,27 @@ has mountopts => (
     default => 'allow_other',
 );
 
+=head2 debug
+
+ $bool = $self->debug;
+
+Enable/disable debug output from L<Fuse>. Default is disabled.
+
+=cut
+
+has debug => (
+    is => 'ro',
+    isa => 'Bool',
+    default => 0,
+);
+
 =head1 METHODS
 
 =head2 run
+
+ $exit_code = $self->run;
+
+Starts L<Fuse>'s mainloop.
 
 =cut
 

@@ -3,6 +3,38 @@ NAME
 
 SYNOPSIS
 DESCRIPTION
+ATTRIBUTES
+  mountpoint
+     $path = $self->mountpoint;
+
+    Path to where the filesystem should be mounted.
+
+    Required.
+
+  mountopts
+     $str = $self->mountopts;
+
+    Default: "allow_other".
+
+  debug
+     $bool = $self->debug;
+
+    Enable/disable debug output from Fuse. Default is disabled.
+
+METHODS
+  run
+     $exit_code = $self->run;
+
+    Starts Fuse's mainloop.
+
+  find_file
+     $real_path = $self->find_file($virtual_path);
+
+    Returns path to the actual template file, from $virtual_path.
+
+  log
+     $bool = $self->log($level, $format, @args);
+
 AUTHOR
     Jan Henning Thorsen
 

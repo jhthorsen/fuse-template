@@ -1,0 +1,3 @@
+#!/usr/bin/perl
+use Fuse::Template;
+exit Fuse::Template->new_with_options->run;

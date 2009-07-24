@@ -5,17 +5,12 @@ use warnings;
 use Test::More;
 use lib q(./lib);
 
-plan tests => 5;
+plan tests => 4;
 
 use_ok("Fuse::Template");
 
 my $mountpoint = "/tmp/fuse-template";
 my $root = "t/templates";
-
-unless(-d $mountpoint) {
-    mkdir $mountpoint or die "Could create mountpoint: $!";
-}
-
 my $obj = Fuse::Template->new(
               root => $root,
               mountpoint => $mountpoint,
@@ -27,6 +22,3 @@ ok($obj, "object constructed");
 is($obj->mountpoint, $mountpoint, "mountpoint attr is set");
 is($obj->find_file("plain.txt"), "$root/plain.txt", "file found");
 
-END {
-    rmdir $mountpoint;
-}

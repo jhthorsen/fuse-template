@@ -17,12 +17,14 @@ Fuse::Template::Schema
 
 use Moose;
 use MooseX::Types -declare => [qw/Schema/];
+use MooseX::Types::Moose qw(:all);
 use DBIx::Class;
+use DBIx::Schema; 
 
-subtype Schema, as 'Object';
+subtype Schema, as Object;
 coerce Schema, (
-    from Str     => via { &from_string },
-    from HashRef => via { &from_hashref },
+    from Str,     via { &from_string },
+    from HashRef, via { &from_hashref },
 );
 
 =head1 FUNCTIONS
@@ -30,6 +32,8 @@ coerce Schema, (
 =head2 from_string
 
  $schema = from_string("$schema_class $dsn");
+ $schema = from_string("$schema_class $dsn $username $password");
+ $schema = from_string("$dsn ...");
 
 =cut
 
@@ -42,9 +46,14 @@ sub from_string {
         eval "require $schema" or confess $@;
         return $schema->connect(split /\s+/, $dsn);
     }
-    else {
-        confess "cannot load from database";
+    elsif($input) {
+        my @keys = qw/db user password/;
+        my %args = map { shift(@keys), $_ } split /\s+/, $input;
+        return DBIx::Schema->connect(\%args);
     }
+    else {
+        confess "invalid arguments";
+   }
 }
 
 =head2 from_hashref

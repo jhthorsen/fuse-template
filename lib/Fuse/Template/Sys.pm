@@ -15,7 +15,7 @@ Documentation is mainly copy/paste from L<Fuse>.
 use Fuse ':all';
 use Moose::Role;
 use Fuse::Template::Root qw/RootObject/;
-use Fcntl qw(S_ISBLK S_ISCHR S_ISFIFO SEEK_SET);
+use Fcntl qw(S_ISBLK S_ISCHR S_ISFIFO SEEK_SET O_RDONLY O_WRONLY);
 
 require 'syscall.ph'; # for SYS_mknod and SYS_lchown
 
@@ -57,19 +57,19 @@ sub getattr {
 
     if($file eq $root->path) {
         @stat = (
-            0,                # device number
-            0,                # inode number
-            $root->mode,      # file mode 
-            1,                # number of hard links
-            $root->uid,       # user id
-            $root->gid,       # group id
-            0,                # device indentifier
-            4096,             # size
-            $root->atime,     # last acess time
-            $root->mtime,     # last modified time
-            $root->ctime,     # last change time
-            $root->block_size,# block size
-            0,                # blocks
+            0,                #  0 device number
+            0,                #  1 inode number
+            $root->mode,      #  2 file mode 
+            1,                #  3 number of hard links
+            $root->uid,       #  4 user id
+            $root->gid,       #  5 group id
+            0,                #  6 device indentifier
+            4096,             #  7 size
+            $root->atime,     #  8 last acess time
+            $root->mtime,     #  9 last modified time
+            $root->ctime,     # 10 last change time
+            $root->block_size,# 11 block size
+            0,                # 12 blocks
         );
     }
     else {
@@ -338,7 +338,7 @@ sub read {
     my $offset  = shift;
     my $file    = $self->find_file($vfile);
     my $size    = -s $file;
-    my($FH, $read);
+    my($FH, $buf);
 
     $self->log(info => "Read $vfile");
 
@@ -346,11 +346,11 @@ sub read {
     return -ENOENT() unless(defined $size);
 
     # open and read file
-    CORE::open $FH, $file             or return -ENOSYS();
-    CORE::seek $FH, $offset, SEEK_SET or return -ENOSYS();
-    CORE::read $FH, $read, $bufsize   or return -ENOSYS();
+    sysopen $FH, $file, O_RDONLY   or return -ENOSYS();
+    sysseek $FH, $offset, SEEK_SET or return -ENOSYS();
+    sysread $FH, $buf, $bufsize    or return -ENOSYS();
 
-    return $read;
+    return $buf;
 }
 
 =head2 write

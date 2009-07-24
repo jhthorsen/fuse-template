@@ -15,6 +15,16 @@ DESCRIPTION
 
     Files in mountpoint are read-only.
 
+TEMPLATES
+    Here is an example template:
+
+     root = [% self.root %]
+     [% rs = schema.resultset('MyTable') %]
+     [% rs = MyTable; # same as schema.resultset(...) %]
+     [% WHILE (row = rs.next) %]
+     col_name = [% row.col_name %]
+     [% END %]
+
 ATTRIBUTES
   root
      $object = $self->root;
@@ -22,7 +32,7 @@ ATTRIBUTES
     $object must be stringified to path where templates/files are located.
     $object must follow the same API as Fuse::Template::Root.
 
-    Can be set in constructor:
+    Can be set in constructor as:
 
      root => \%constructor_args
      root => $path_to_root
@@ -45,6 +55,16 @@ ATTRIBUTES
 
     Enable/disable debug output from Fuse. Default is disabled.
 
+  schema
+     $dbic_object = $self->schema;
+
+    Can be set in constructor as:
+
+     schema => \%args
+     schema => "$dsn $username $passwor"
+
+    See Fuse::Template::Schema for details.
+
 METHODS
   run
      $exit_code = $self->run;
@@ -54,10 +74,10 @@ METHODS
   find_file
      $real_path = $self->find_file($virtual_path);
 
-    Returns path to the actual template file, from $virtual_path.
+    Returns path to the file in root path.
 
   log
-     $bool = $self->log($level, $format, @args);
+     $bool = $self->log($level => $format => @args);
 
 AUTHOR
     Jan Henning Thorsen

@@ -5,6 +5,7 @@ all_from 'lib/Fuse/Template.pm';
 
 requires 'Moose' => 0.80;
 requires 'MooseX::Types' => 0.10;
+requires 'DBIx::Class' => 0.08;
 requires 'Fuse' => 0.09;
 requires 'Fcntl' => 1.00;
 

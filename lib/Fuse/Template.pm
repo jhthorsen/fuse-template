@@ -20,9 +20,21 @@ are read and the output is accessible on mountpoint side.
 
 Files in mountpoint are read-only.
 
+=head1 TEMPLATES
+
+Here is an example template:
+
+ root = [% self.root %]
+ [% rs = schema.resultset('MyTable') %]
+ [% rs = MyTable; # same as schema.resultset(...) %]
+ [% WHILE (row = rs.next) %]
+ col_name = [% row.col_name %]
+ [% END %]
+
 =cut
 
 use Moose;
+use Fuse::Template::Schema qw/Schema/;
 use threads;
 use threads::shared;
 
@@ -37,7 +49,7 @@ with qw/Fuse::Template::Sys/;
 C<$object> must be stringified to path where templates/files are located.
 C<$object> must follow the same API as L<Fuse::Template::Root>.
 
-Can be set in constructor:
+Can be set in constructor as:
 
  root => \%constructor_args
  root => $path_to_root
@@ -87,6 +99,25 @@ has debug => (
     default => 0,
 );
 
+=head2 schema
+
+ $dbic_object = $self->schema;
+
+Can be set in constructor as:
+
+ schema => \%args
+ schema => "$dsn $username $passwor"
+
+See L<Fuse::Template::Schema> for details.
+
+=cut
+
+has schema => (
+    is => 'ro',
+    isa => Schema,
+    coerce => 1,
+);
+
 =head1 METHODS
 
 =head2 run
@@ -105,12 +136,14 @@ sub run {
         $callbacks{$method} = sub { $self->$method(@_) };
     }
 
+    $self->log(info => "Starting Fuse mainloop");
+
     Fuse::main(
+        %callbacks,
         mountpoint => $self->mountpoint,
         debug      => $self->debug,
         mountopts  => $self->mountopts,
         threaded   => 1,
-        %callbacks,
     );
 
     return 0;
@@ -120,7 +153,7 @@ sub run {
 
  $real_path = $self->find_file($virtual_path);
 
-Returns path to the actual template file, from C<$virtual_path>.
+Returns path to the file in root path.
 
 =cut
 
@@ -128,20 +161,28 @@ sub find_file {
     my $self  = shift;
     my $vfile = shift;
 
-    # ...
+    $self->log(debug => "Locate file from %s", $vfile);
 
     return "";
 }
 
 =head2 log
 
- $bool = $self->log($level, $format, @args);
+ $bool = $self->log($level => $format => @args);
 
 =cut
 
 sub log {
-    my $self = shift;
-    warn "@_";
+    my $self   = shift;
+    my $level  = shift;
+    my $format = shift;
+    my @args;
+
+    for(@_) {
+        push @args, defined $_ ? $_ : '__UNDEF__';
+    }
+
+    warn sprintf "%s $level $format", time, @args;
 }
 
 =head1 AUTHOR

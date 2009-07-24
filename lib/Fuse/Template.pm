@@ -30,13 +30,26 @@ with qw/Fuse::Template::Sys/;
 
 =head1 ATTRIBUTES
 
+=head2 root
+
+ $object = $self->root;
+
+C<$object> must be stringified to path where templates/files are located.
+C<$object> must follow the same API as L<Fuse::Template::Root>.
+
+Can be set in constructor:
+
+ root => \%constructor_args
+ root => $path_to_root
+
+C<%constructor_args> can override defaults, while C<$path_to_root> will
+only override C<path> attribute in root-object.
+
 =head2 mountpoint
 
  $path = $self->mountpoint;
 
 Path to where the filesystem should be mounted.
-
-Required.
 
 =cut
 

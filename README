@@ -16,12 +16,24 @@ DESCRIPTION
     Files in mountpoint are read-only.
 
 ATTRIBUTES
+  root
+     $object = $self->root;
+
+    $object must be stringified to path where templates/files are located.
+    $object must follow the same API as Fuse::Template::Root.
+
+    Can be set in constructor:
+
+     root => \%constructor_args
+     root => $path_to_root
+
+    %constructor_args can override defaults, while $path_to_root will only
+    override "path" attribute in root-object.
+
   mountpoint
      $path = $self->mountpoint;
 
     Path to where the filesystem should be mounted.
-
-    Required.
 
   mountopts
      $str = $self->mountopts;

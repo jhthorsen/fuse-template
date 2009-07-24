@@ -27,9 +27,11 @@ Here is an example template:
  root = [% self.root %]
  [% rs = schema.resultset('MyTable') %]
  [% rs = MyTable; # same as schema.resultset(...) %]
- [% WHILE (row = rs.next) %]
- col_name = [% row.col_name %]
+ [% WHILE (row = rs.next) # get next row in resultset %]
+ col_name = [% row.col_name # retrieve column data %]
  [% END %]
+
+See L<DBIx::Class> for information on how to use the L<schema> object.
 
 =cut
 
@@ -106,7 +108,7 @@ has debug => (
 Can be set in constructor as:
 
  schema => \%args
- schema => "$dsn $username $passwor"
+ schema => "$dsn $username $password"
 
 See L<Fuse::Template::Schema> for details.
 

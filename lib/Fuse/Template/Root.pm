@@ -4,10 +4,24 @@ package Fuse::Template::Root;
 
 Fuse::Template::Root
 
+=head1 SYNOPSIS
+
+ # will import RootObject typeconstraint
+ use Fuse::Template::Root qw/RootObject/;
+ has foo => ( isa => RootObject, coerce => 1 );
+ ...
+
 =cut
 
 use Moose;
+use MooseX::Types -declare => [qw/RootObject/];
 use overload q("") => sub { shift->path }, fallback => 1;
+
+subtype RootObject, as "Object";
+coerce RootObject, (
+    from Str     => via { Fuse::Template::Root->new(path => $_) },
+    from HashRef => via { Fuse::Template::Root->new($_) },
+);
 
 =head1 ATTIBUTES
 

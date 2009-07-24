@@ -14,6 +14,7 @@ Documentation is mainly copy/paste from L<Fuse>.
 
 use Fuse ':all';
 use Moose::Role;
+use Fuse::Template::Root qw/RootObject/;
 use Fcntl qw(S_ISBLK S_ISCHR S_ISFIFO SEEK_SET);
 
 require 'syscall.ph'; # for SYS_mknod and SYS_lchown
@@ -32,7 +33,8 @@ Required.
 
 has root => (
     is => 'ro',
-    isa => 'Object',
+    isa => RootObject,
+    coerce => 1,
     required => 1,
 );
 
@@ -527,7 +529,7 @@ sub removexattr {
 
 =head1 AUTHOR
 
-Jan Henning Thorsen
+See L<Fuse::Template>
 
 =cut
 

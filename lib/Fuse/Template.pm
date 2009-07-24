@@ -79,14 +79,16 @@ has mountpoint => (
 
  $str = $self->mountopts;
 
-Default: "allow_other".
+Mount options:
+
+ allow_other
 
 =cut
 
 has mountopts => (
     is => 'ro',
     isa => 'Str',
-    default => 'allow_other',
+    default => '',
 );
 
 =head2 debug
@@ -164,10 +166,11 @@ Returns path to the file in root path.
 sub find_file {
     my $self  = shift;
     my $vfile = shift;
+    my $root  = $self->root;
 
     $self->log(debug => "Locate file from %s", $vfile);
 
-    return "";
+    return "$root/$vfile";
 }
 
 =head2 log
@@ -177,6 +180,8 @@ sub find_file {
 =cut
 
 sub log {
+    return unless $_[0]->debug;
+
     my $self   = shift;
     my $level  = shift;
     my $format = shift;
@@ -186,7 +191,7 @@ sub log {
         push @args, defined $_ ? $_ : '__UNDEF__';
     }
 
-    warn sprintf "%s $level $format", time, @args;
+    warn sprintf "%s $level $format", scalar(localtime), @args;
 }
 
 =head1 AUTHOR

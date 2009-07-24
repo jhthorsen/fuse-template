@@ -10,6 +10,8 @@ This project is a work in progress - Nothing works just now.
 
 =head1 DESCRIPTION
 
+File system structure:
+
  root/               -> mountpooit/
  root/somefile       -> mountpoint/somefile
  root/foo.tt         -> mountpoint/foo

@@ -15,12 +15,13 @@ Fuse::Template::Root
 
 use Moose;
 use MooseX::Types -declare => [qw/RootObject/];
+use MooseX::Types::Moose qw(:all);
 use overload q("") => sub { shift->path }, fallback => 1;
 
-subtype RootObject, as "Object";
+subtype RootObject, as Object;
 coerce RootObject, (
-    from Str     => via { Fuse::Template::Root->new(path => $_) },
-    from HashRef => via { Fuse::Template::Root->new($_) },
+    from Str,     via { Fuse::Template::Root->new(path => $_) },
+    from HashRef, via { Fuse::Template::Root->new($_) },
 );
 
 =head1 ATTIBUTES

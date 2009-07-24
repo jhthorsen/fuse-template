@@ -4,17 +4,27 @@ package Fuse::Template;
 
 Fuse::Template - Mount a template dir
 
-=head1 SYNOPSIS
+=head1 NOTE
+
+This project is a work in progress - Nothing works just now.
 
 =head1 DESCRIPTION
+
+ root/               -> mountpooit/
+ root/somefile       -> mountpoint/somefile
+ root/foo.tt         -> mountpoint/foo
+ root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
+
+C<somefile> is accessible directly at C<mountpoint>. Template files (.tt)
+are read and the output is accessible on mountpoint side.
+
+Files in mountpoint are read-only.
 
 =cut
 
 use Moose;
 use threads;
 use threads::shared;
-
-require 'syscall.ph'; # for SYS_mknod and SYS_lchown
 
 with qw/Fuse::Template::Sys/;
 

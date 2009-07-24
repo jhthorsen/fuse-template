@@ -1,8 +1,20 @@
 NAME
     Fuse::Template - Mount a template dir
 
-SYNOPSIS
+NOTE
+    This project is a work in progress - Nothing works just now.
+
 DESCRIPTION
+     root/               -> mountpooit/
+     root/somefile       -> mountpoint/somefile
+     root/foo.tt         -> mountpoint/foo
+     root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
+
+    "somefile" is accessible directly at "mountpoint". Template files (.tt)
+    are read and the output is accessible on mountpoint side.
+
+    Files in mountpoint are read-only.
+
 ATTRIBUTES
   mountpoint
      $path = $self->mountpoint;

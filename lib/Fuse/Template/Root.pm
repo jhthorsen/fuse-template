@@ -107,6 +107,18 @@ has atime => (
     default => time,
 );
 
+=head2 block_size
+
+ $int = $self->block_size;
+
+=cut
+
+has block_size => (
+    is => 'ro',
+    isa => 'Int',
+    default => 1024,
+);
+
 =head1 AUTHOR
 
 See L<Fuse::Template>

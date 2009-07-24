@@ -1,95 +1,90 @@
-.::lib::Fuse::Template(U3s)er Contributed Perl Documentat.i:o:nlib::Fuse::Template(3)
+NAME
+    Fuse::Template - Mount a template dir
 
+NOTE
+    This project is a work in progress - Nothing works just now.
 
+DESCRIPTION
+    File system structure:
 
-NNAAMMEE
-       Fuse::Template - Mount a template dir
+     root/               -> mountpooit/
+     root/somefile       -> mountpoint/somefile
+     root/foo.tt         -> mountpoint/foo
+     root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
 
-NNOOTTEE
-       This project is a work in progress - Nothing works just now.
+    "somefile" is accessible directly at "mountpoint". Template files (.tt)
+    are read and the output is accessible on mountpoint side.
 
-DDEESSCCRRIIPPTTIIOONN
-       File system structure:
+    Files in mountpoint are read-only.
 
-        root/               -> mountpooit/
-        root/somefile       -> mountpoint/somefile
-        root/foo.tt         -> mountpoint/foo
-        root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
+TEMPLATES
+    Here is an example template:
 
-       "somefile" is accessible directly at "mountpoint". Template files (.tt)
-       are read and the output is accessible on mountpoint side.
+     root = [% self.root %]
+     [% rs = schema.resultset('MyTable') %]
+     [% rs = MyTable; # same as schema.resultset(...) %]
+     [% WHILE (row = rs.next) # get next row in resultset %]
+     col_name = [% row.col_name # retrieve column data %]
+     [% END %]
 
-       Files in mountpoint are read-only.
+    See DBIx::Class for information on how to use the schema object.
 
-TTEEMMPPLLAATTEESS
-       Here is an example template:
+ATTRIBUTES
+  root
+     $object = $self->root;
 
-        root = [% self.root %]
-        [% rs = schema.resultset('MyTable') %]
-        [% rs = MyTable; # same as schema.resultset(...) %]
-        [% WHILE (row = rs.next) # get next row in resultset %]
-        col_name = [% row.col_name # retrieve column data %]
-        [% END %]
+    $object must be stringified to path where templates/files are located.
+    $object must follow the same API as Fuse::Template::Root.
 
-       See DBIx::Class for information on how to use the schema object.
+    Can be set in constructor as:
 
-AATTTTRRIIBBUUTTEESS
-   rroooott
-        $object = $self->root;
+     root => \%constructor_args
+     root => $path_to_root
 
-       $object must be stringified to path where templates/files are located.
-       $object must follow the same API as Fuse::Template::Root.
+    %constructor_args can override defaults, while $path_to_root will only
+    override "path" attribute in root-object.
 
-       Can be set in constructor as:
+  mountpoint
+     $path = $self->mountpoint;
 
-        root => \%constructor_args
-        root => $path_to_root
+    Path to where the filesystem should be mounted.
 
-       %constructor_args can override defaults, while $path_to_root will only
-       override "path" attribute in root-object.
+  mountopts
+     $str = $self->mountopts;
 
-   mmoouunnttppooiinntt
-        $path = $self->mountpoint;
+    Mount options:
 
-       Path to where the filesystem should be mounted.
+     allow_other
 
-   mmoouunnttooppttss
-        $str = $self->mountopts;
+  debug
+     $bool = $self->debug;
 
-       Default: "allow_other".
+    Enable/disable debug output from Fuse. Default is disabled.
 
-   ddeebbuugg
-        $bool = $self->debug;
+  schema
+     $dbic_object = $self->schema;
 
-       Enable/disable debug output from Fuse. Default is disabled.
+    Can be set in constructor as:
 
-   sscchheemmaa
-        $dbic_object = $self->schema;
+     schema => \%args
+     schema => "$dsn $username $password"
 
-       Can be set in constructor as:
+    See Fuse::Template::Schema for details.
 
-        schema => \%args
-        schema => "$dsn $username $password"
+METHODS
+  run
+     $exit_code = $self->run;
 
-       See Fuse::Template::Schema for details.
+    Starts Fuse's mainloop.
 
-MMEETTHHOODDSS
-   rruunn
-        $exit_code = $self->run;
+  find_file
+     $real_path = $self->find_file($virtual_path);
 
-       Starts Fuse’s mainloop.
+    Returns path to the file in root path.
 
-   ffiinndd__ffiillee
-        $real_path = $self->find_file($virtual_path);
+  log
+     $bool = $self->log($level => $format => @args);
 
-       Returns path to the file in root path.
+AUTHOR
+    Jan Henning Thorsen
 
-   lloogg
-        $bool = $self->log($level => $format => @args);
-
-AAUUTTHHOORR
-       Jan Henning Thorsen
-
-
-
-perl v5.10.0                      2009-07-24         .::lib::Fuse::Template(3)

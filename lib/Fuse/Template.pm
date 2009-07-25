@@ -124,6 +124,12 @@ has schema => (
     coerce => 1,
 );
 
+has _templates => (
+    is => 'ro',
+    isa => 'HashRef',
+    default => sub { {} },
+);
+
 =head1 METHODS
 
 =head2 run
@@ -170,7 +176,12 @@ sub find_file {
 
     $self->log(debug => "Locate file from %s", $vfile);
 
-    return "$root/$vfile";
+    if(-e "$root/$vfile.tt") {
+        return "$root/$vfile.tt";
+    }
+    else {
+        return "$root/$vfile";
+    }
 }
 
 =head2 log
@@ -192,6 +203,37 @@ sub log {
     }
 
     warn sprintf "%s $level $format", scalar(localtime), @args;
+}
+
+# around ::Sys::getdir(...);
+around getdir => sub {
+    my $next  = shift;
+    my $self  = shift;
+    my @files = $self->$next(@_);
+
+    return map { s/\.tt$//; $_; } @files;
+};
+
+# around ::Sys::read(...);
+around read => sub {
+    my($next, $self, $vfile, $bufsize, $offset) = @_;
+    my $file = $self->find_file($vfile);
+    my $template;
+
+    # standard file
+    unless($file =~ /\.tt$/) {
+        return $self->$next($vfile, $bufsize, $offset);
+    }
+
+    unless($template = $self->_templates->{$vfile}) {
+        $template = $self->_templates->{$vfile} = $self->_template($file);
+    }
+
+    return $template;
+};
+
+sub _template {
+    return "foo";
 }
 
 =head1 AUTHOR

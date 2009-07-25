@@ -15,7 +15,14 @@ Documentation is mainly copy/paste from L<Fuse>.
 use Fuse ':all';
 use Moose::Role;
 use Fuse::Template::Root qw/RootObject/;
-use Fcntl qw(S_ISBLK S_ISCHR S_ISFIFO SEEK_SET O_RDONLY O_WRONLY);
+use Fcntl qw(
+    S_ISBLK S_ISCHR S_ISFIFO SEEK_SET
+    O_RDONLY O_WRONLY O_RDWR O_APPEND O_CREAT
+);
+use POSIX qw(
+    EROFS ENOENT ENOSYS EEXIST EPERM
+);
+
 
 require 'syscall.ph'; # for SYS_mknod and SYS_lchown
 

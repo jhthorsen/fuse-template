@@ -15,11 +15,15 @@ Fuse::Template::Schema
 
 =cut
 
-use Moose;
+BEGIN {
+    # required for extends + MooseX::Types to work properly
+    use Moose;
+    extends qw/DBIx::Class::Schema::Loader/;
+}
+
 use MooseX::Types -declare => [qw/Schema/];
 use MooseX::Types::Moose qw(:all);
 use DBIx::Class;
-use DBIx::Schema; 
 
 subtype Schema, as Object;
 coerce Schema, (
@@ -41,15 +45,13 @@ sub from_string {
     my $input = $_;
 
     if($input =~ /([\w:]+)\s(.*)/) {
-        my $schema = $1;
-        my $dsn    = $2; # "$dsn $username $password";
-        eval "require $schema" or confess $@;
-        return $schema->connect(split /\s+/, $dsn);
+        my $class = $1;
+        my $dsn   = $2; # "$dsn $username $password";
+        eval "require $class" or confess $@;
+        return $class->connect(split /\s+/, $dsn);
     }
     elsif($input) {
-        my @keys = qw/db user password/;
-        my %args = map { shift(@keys), $_ } split /\s+/, $input;
-        return DBIx::Schema->connect(\%args);
+        return __PACKAGE__->connect(split /\s+/, $input);
     }
     else {
         confess "invalid arguments";
@@ -59,23 +61,22 @@ sub from_string {
 =head2 from_hashref
 
  $schema = from_hashref({
-               schema => $class_name,
+               schema => $class_name, # optional
                dsn => $dbi_dsn,
                username => $str,
                password => $str,
-               %dbi_params,
+               %dbi_params, # optional
            });
 
 =cut
 
 sub from_hashref {
-    my $args = $_;
-    my $schema;
+    my $args   = $_;
+    my $schema = delete $args->{'schema'};
 
-    confess "need schema" unless($schema = delete $args->{'schema'});
-    confess "need dsn"    unless($args->{'dsn'});
+    confess "'dsn' is required" unless($args->{'dsn'});
 
-    eval "require $schema" or confess $@;
+    $schema ||= __PACKAGE__;
 
     return $schema->connect(
         delete $args->{'dsn'},

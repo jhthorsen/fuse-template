@@ -4,6 +4,13 @@ package Fuse::Template::Schema;
 
 Fuse::Template::Schema
 
+=head1 DESCRIPTION
+
+Using L<DBIx::Class::Schema::Loader> to read table definitions from
+database will use the default moniker rules to name resultsets from
+table names. See L<DBIx::Class::Schema::Loader::Base/moniker_map> for
+details.
+
 =head1 SYNOPSIS
 
  use Fuse::Template::Schema qw/Schema/;

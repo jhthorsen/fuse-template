@@ -2,15 +2,19 @@ package Fuse::Template;
 
 =head1 NAME
 
-Fuse::Template - Mount a template dir
-
-=head1 NOTE
-
-This project is a work in progress - Nothing works just now.
+Fuse::Template - Mount a directory with templates.
 
 =head1 DESCRIPTION
 
-File system structure:
+The idea with this project is to auto-maintain password files, and other
+plain text files for different systems, with data from a database.
+
+Got issues with installation? See C<INSTALL> for details and list
+of prerequisite.
+
+See C<examples/> in this distribution for templates.
+
+Example file system structure:
 
  root/               -> mountpooit/
  root/somefile       -> mountpoint/somefile
@@ -18,9 +22,10 @@ File system structure:
  root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
 
 C<somefile> is accessible directly at C<mountpoint>. Template files (.tt)
-are read and the output is accessible on mountpoint side.
+are parsed and the output is accessible on mountpoint side. This is done
+using L<Template::Toolkit>.
 
-Files in mountpoint are read-only.
+Files in mountpoint are read-only for now.
 
 =head1 TEMPLATES
 
@@ -34,6 +39,25 @@ Here is an example template:
  [% END %]
 
 See L<DBIx::Class> for information on how to use the L<schema> object.
+
+Available variables:
+
+ root
+ mountpoint
+ mountopts
+ self # this object
+ schema # DBIx::Class object
+ + all resultsetset/tables
+
+Resultset use this naming convention to convert tablenames:
+
+    Table Name  | Moniker Name
+    ---------------------------
+    luser       | Luser
+    luser_group | LuserGroup
+    luser-opts  | LuserOpts
+
+See L<DBIx::Class::Schema::Loader/moniker_map> for details
 
 =cut
 
@@ -80,9 +104,7 @@ has mountpoint => (
 
  $str = $self->mountopts;
 
-Mount options:
-
- allow_other
+Example mount option: "allow_other"
 
 =cut
 
@@ -90,20 +112,6 @@ has mountopts => (
     is => 'ro',
     isa => 'Str',
     default => '',
-);
-
-=head2 debug
-
- $bool = $self->debug;
-
-Enable/disable debug output from L<Fuse>. Default is disabled.
-
-=cut
-
-has debug => (
-    is => 'ro',
-    isa => 'Bool',
-    default => 0,
 );
 
 =head2 schema
@@ -123,6 +131,20 @@ has schema => (
     is => 'ro',
     isa => Schema,
     coerce => 1,
+);
+
+=head2 debug
+
+ $bool = $self->debug;
+
+Enable/disable debug output from L<Fuse>. Default is disabled.
+
+=cut
+
+has debug => (
+    is => 'ro',
+    isa => 'Bool',
+    default => 0,
 );
 
 has _template => (

@@ -63,7 +63,7 @@ sub BUILDARGS {
     return $args;
 }
 
-=head1 render
+=head2 render
 
  $output = $self->render($virtual_file);
 

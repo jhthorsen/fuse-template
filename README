@@ -1,11 +1,16 @@
 NAME
-    Fuse::Template - Mount a template dir
-
-NOTE
-    This project is a work in progress - Nothing works just now.
+    Fuse::Template - Mount a directory with templates.
 
 DESCRIPTION
-    File system structure:
+    The idea with this project is to auto-maintain password files, and other
+    plain text files for different systems, with data from a database.
+
+    Got issues with installation? See "INSTALL" for details and list of
+    prerequisite.
+
+    See "examples/" in this distribution for templates.
+
+    Example file system structure:
 
      root/               -> mountpooit/
      root/somefile       -> mountpoint/somefile
@@ -13,9 +18,10 @@ DESCRIPTION
      root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
 
     "somefile" is accessible directly at "mountpoint". Template files (.tt)
-    are read and the output is accessible on mountpoint side.
+    are parsed and the output is accessible on mountpoint side. This is done
+    using Template::Toolkit.
 
-    Files in mountpoint are read-only.
+    Files in mountpoint are read-only for now.
 
 TEMPLATES
     Here is an example template:
@@ -28,6 +34,25 @@ TEMPLATES
      [% END %]
 
     See DBIx::Class for information on how to use the schema object.
+
+    Available variables:
+
+     root
+     mountpoint
+     mountopts
+     self # this object
+     schema # DBIx::Class object
+     + all resultsetset/tables
+
+    Resultset use this naming convention to convert tablenames:
+
+        Table Name  | Moniker Name
+        ---------------------------
+        luser       | Luser
+        luser_group | LuserGroup
+        luser-opts  | LuserOpts
+
+    See "moniker_map" in DBIx::Class::Schema::Loader for details
 
 ATTRIBUTES
   root
@@ -52,14 +77,7 @@ ATTRIBUTES
   mountopts
      $str = $self->mountopts;
 
-    Mount options:
-
-     allow_other
-
-  debug
-     $bool = $self->debug;
-
-    Enable/disable debug output from Fuse. Default is disabled.
+    Example mount option: "allow_other"
 
   schema
      $dbic_object = $self->schema;
@@ -70,6 +88,11 @@ ATTRIBUTES
      schema => "$dsn $username $password"
 
     See Fuse::Template::Schema for details.
+
+  debug
+     $bool = $self->debug;
+
+    Enable/disable debug output from Fuse. Default is disabled.
 
 METHODS
   run

@@ -9,6 +9,7 @@ requires 'DBIx::Class' => 0.08;
 requires 'DBIx::Class::Schema::Loader' => 0.04;
 requires 'Fuse' => 0.09;
 requires 'Fcntl' => 1.00;
+requires 'Template' => 2.0;
 
 test_requires 'Test::More' => 0;
 

@@ -4,6 +4,36 @@ package Fuse::Template;
 
 Fuse::Template - Mount a directory with templates.
 
+=head1 USAGE
+
+C<sudo> might be optional.
+
+=head2 MOUNT
+
+Example SQLite:
+
+ $ sudo fuse-template
+   --root /path/to/templates \
+   --mountpoint /path/to/mountpoint \
+   --schema dbi:SQLite:path/to/db \
+   ;
+
+Example MySQL:
+
+ $ sudo fuse-template
+   --root /path/to/templates \
+   --mountpoint /path/to/mountpoint \
+   --schema "dbi:mysql:database=MyDB;host=127.1;port=3006 user pass" \
+   ;
+
+See L<DBI> for possible C<--schema> formats.
+
+=head2 UNMOUNT
+
+This needs to be done manually for now. (Patches are welcome!)
+
+ sudo umount /path/to/mountpoint;
+
 =head1 DESCRIPTION
 
 The idea with this project is to auto-maintain password files, and other
@@ -130,8 +160,13 @@ has schema => (
     is => 'ro',
     isa => Schema,
     coerce => 1,
-    documentation => 'Schema name or dsn. --schema help for details',
+    lazy_build => 1,
+    documentation => 'Schema name or dsn',
 );
+
+sub _build_schema {
+    confess "Cannot build schema without information!";
+}
 
 =head2 debug
 
@@ -157,7 +192,7 @@ has _template => (
 
 sub _build__template {
     my $self = shift;
-    
+
     return Fuse::Template::TT->new(
         paths => [$self->root->path],
         vars => {
@@ -165,8 +200,6 @@ sub _build__template {
             mountpoint => $self->mountpoint,
             mountopts => $self->mountopts,
             self => $self,
-            schema => $self->schema,
-            map { $_, $self->schema->resultset($_) } $self->schema->sources,
         },
     );
 }
@@ -184,16 +217,22 @@ Returns path to the file in root path.
 sub find_file {
     my $self  = shift;
     my $vfile = shift;
-    my $root  = $self->root;
+    my $root  = $self->root->path;
+    my $file;
 
-    $self->log(debug => "Locate file from %s", $vfile);
+    $root  =~ s,/+$,,;
+    $vfile =~ s,^/+,,;
 
     if(-e "$root/$vfile.tt") {
-        return "$root/$vfile.tt";
+        $file = "$root/$vfile.tt";
     }
-    else {
-        return "$root/$vfile";
+    elsif(-e "$root/$vfile") {
+        $file = "$root/$vfile";
     }
+
+    $self->log(debug => "%s = %s + find_file(%s)", $file, $root, $vfile);
+
+    return $file;
 }
 
 =head2 log
@@ -214,7 +253,7 @@ sub log {
         push @args, defined $_ ? $_ : '__UNDEF__';
     }
 
-    warn sprintf "%s $level $format", scalar(localtime), @args;
+    warn sprintf "$level - $format\n", @args;
 }
 
 # around ::Sys::getdir(...);
@@ -233,6 +272,15 @@ around read => sub {
 
     # standard file
     if($file =~ /\.tt$/) {
+        $vfile =~ s,^/,,;
+
+        if($self->has_schema) {
+            my $vars = $self->_template->vars;
+            my $schema = $self->schema;
+            $vars->{'schema'} = $schema;
+            $vars->{$_} = $schema->resultset($_) for($schema->sources);
+        }
+
         my $output = $self->render("$vfile.tt");
         return substr $output, $offset, $bufsize;
     }

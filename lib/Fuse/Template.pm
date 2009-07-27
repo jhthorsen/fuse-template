@@ -39,6 +39,7 @@ See L<DBIx::Class> for information on how to use the L<schema> object.
 
 use Moose;
 use Fuse::Template::Schema qw/Schema/;
+use Fuse::Template::TT;
 use threads;
 use threads::shared;
 
@@ -124,11 +125,28 @@ has schema => (
     coerce => 1,
 );
 
-has _templates => (
+has _template => (
     is => 'ro',
-    isa => 'HashRef',
-    default => sub { {} },
+    isa => 'Object',
+    handles => [qw/render/],
+    lazy_build => 1,
 );
+
+sub _build__template {
+    my $self = shift;
+    
+    return Fuse::Template::TT->new(
+        paths => [$self->root->path],
+        vars => {
+            root => $self->root->path,
+            mountpoint => $self->mountpoint,
+            mountopts => $self->mountopts,
+            self => $self,
+            schema => $self->schema,
+            map { $_, $self->schema->resultset($_) } $self->schema->sources,
+        },
+    );
+}
 
 =head1 METHODS
 
@@ -218,23 +236,16 @@ around getdir => sub {
 around read => sub {
     my($next, $self, $vfile, $bufsize, $offset) = @_;
     my $file = $self->find_file($vfile);
-    my $template;
 
     # standard file
-    unless($file =~ /\.tt$/) {
+    if($file =~ /\.tt$/) {
+        my $output = $self->render("$vfile.tt");
+        return substr $output, $offset, $bufsize;
+    }
+    else {
         return $self->$next($vfile, $bufsize, $offset);
     }
-
-    unless($template = $self->_templates->{$vfile}) {
-        $template = $self->_templates->{$vfile} = $self->_template($file);
-    }
-
-    return $template;
 };
-
-sub _template {
-    return "foo";
-}
 
 =head1 AUTHOR
 

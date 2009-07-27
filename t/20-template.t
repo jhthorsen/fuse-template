@@ -26,5 +26,9 @@ ok(!$obj->open("users.cfg", O_RDONLY), "file found");
 
 my $data = $obj->read("users.cfg", 8096, 0);
 ok(length $data > 10, "file read");
+like($data, qr{$root}, "'$root' in file");
 like($data, qr{ola}, "'ola' in file");
+
+my $data = $obj->read("users.cfg", 19, 0);
+is($data, "root = $root\n", "read 19 bytes");
 

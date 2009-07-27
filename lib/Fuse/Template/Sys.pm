@@ -94,6 +94,7 @@ sub readlink {
 
     $self->log(debug => "readlink(%s)", $file);
 
+    return 0 unless($file); # such file or directory
     return readlink $file;
 }
 

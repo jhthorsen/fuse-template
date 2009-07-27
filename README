@@ -1,150 +1,142 @@
-.::lib::Fuse::Template(U3s)er Contributed Perl Documentat.i:o:nlib::Fuse::Template(3)
+NAME
+    Fuse::Template - Mount a directory with templates.
 
+VERSION
+    0.01
 
+USAGE
+    "sudo" might be optional.
 
-NNAAMMEE
-       Fuse::Template - Mount a directory with templates.
+  MOUNT
+    Example SQLite:
 
-VVEERRSSIIOONN
-       0.01
+     $ sudo fuse-template
+       --root /path/to/templates \
+       --mountpoint /path/to/mountpoint \
+       --schema dbi:SQLite:path/to/db \
+       ;
 
-UUSSAAGGEE
-       "sudo" might be optional.
+    Example MySQL:
 
-   MMOOUUNNTT
-       Example SQLite:
+     $ sudo fuse-template
+       --root /path/to/templates \
+       --mountpoint /path/to/mountpoint \
+       --schema "dbi:mysql:database=MyDB;host=127.1;port=3006 user pass" \
+       ;
 
-        $ sudo fuse-template
-          --root /path/to/templates \
-          --mountpoint /path/to/mountpoint \
-          --schema dbi:SQLite:path/to/db \
-          ;
+    See DBI for possible "--schema" formats.
 
-       Example MySQL:
+  UNMOUNT
+    This needs to be done manually for now. (Patches are welcome!)
 
-        $ sudo fuse-template
-          --root /path/to/templates \
-          --mountpoint /path/to/mountpoint \
-          --schema "dbi:mysql:database=MyDB;host=127.1;port=3006 user pass" \
-          ;
+     sudo umount /path/to/mountpoint;
 
-       See DBI for possible "--schema" formats.
+DESCRIPTION
+    The idea with this project is to auto-maintain password files, and other
+    plain text files for different systems, with data from a database.
 
-   UUNNMMOOUUNNTT
-       This needs to be done manually for now. (Patches are welcome!)
+    Got issues with installation? See "INSTALL" for details and list of
+    prerequisite.
 
-        sudo umount /path/to/mountpoint;
+    See "examples/" in this distribution for templates.
 
-DDEESSCCRRIIPPTTIIOONN
-       The idea with this project is to auto-maintain password files, and
-       other plain text files for different systems, with data from a
-       database.
+    Example file system structure:
 
-       Got issues with installation? See "INSTALL" for details and list of
-       prerequisite.
+     root/               -> mountpooit/
+     root/somefile       -> mountpoint/somefile
+     root/foo.tt         -> mountpoint/foo
+     root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
 
-       See "examples/" in this distribution for templates.
+    "somefile" is accessible directly at "mountpoint". Template files (.tt)
+    are parsed and the output is accessible on mountpoint side. This is done
+    using Template::Toolkit.
 
-       Example file system structure:
+    Files in mountpoint are read-only for now.
 
-        root/               -> mountpooit/
-        root/somefile       -> mountpoint/somefile
-        root/foo.tt         -> mountpoint/foo
-        root/bar/baz.txt.tt -> mountpoint/bar/baz.txt
+TEMPLATES
+    Here is an example template:
 
-       "somefile" is accessible directly at "mountpoint". Template files (.tt)
-       are parsed and the output is accessible on mountpoint side. This is
-       done using Template::Toolkit.
+     root = [% self.root %]
+     [% rs = schema.resultset('MyTable') %]
+     [% rs = MyTable; # same as schema.resultset(...) %]
+     [% WHILE (row = rs.next) # get next row in resultset %]
+     col_name = [% row.col_name # retrieve column data %]
+     [% END %]
 
-       Files in mountpoint are read-only for now.
+    See DBIx::Class for information on how to use the schema object.
 
-TTEEMMPPLLAATTEESS
-       Here is an example template:
+    Available variables:
 
-        root = [% self.root %]
-        [% rs = schema.resultset('MyTable') %]
-        [% rs = MyTable; # same as schema.resultset(...) %]
-        [% WHILE (row = rs.next) # get next row in resultset %]
-        col_name = [% row.col_name # retrieve column data %]
-        [% END %]
+     root
+     mountpoint
+     mountopts
+     self # this object
+     schema # DBIx::Class object
+     + all resultsetset/tables
 
-       See DBIx::Class for information on how to use the schema object.
+    Resultset use this naming convention to convert tablenames:
 
-       Available variables:
+        Table Name  | Moniker Name
+        ---------------------------
+        luser       | Luser
+        luser_group | LuserGroup
+        luser-opts  | LuserOpts
 
-        root
-        mountpoint
-        mountopts
-        self # this object
-        schema # DBIx::Class object
-        + all resultsetset/tables
+    See "moniker_map" in DBIx::Class::Schema::Loader for details
 
-       Resultset use this naming convention to convert tablenames:
+ATTRIBUTES
+  root
+     $object = $self->root;
 
-           Table Name  | Moniker Name
-           ---------------------------
-           luser       | Luser
-           luser_group | LuserGroup
-           luser-opts  | LuserOpts
+    $object must be stringified to path where templates/files are located.
+    $object must follow the same API as Fuse::Template::Root.
 
-       See "moniker_map" in DBIx::Class::Schema::Loader for details
+    Can be set in constructor as:
 
-AATTTTRRIIBBUUTTEESS
-   rroooott
-        $object = $self->root;
+     root => \%constructor_args
+     root => $path_to_root
 
-       $object must be stringified to path where templates/files are located.
-       $object must follow the same API as Fuse::Template::Root.
+    %constructor_args can override defaults, while $path_to_root will only
+    override "path" attribute in root-object.
 
-       Can be set in constructor as:
+  mountpoint
+     $path = $self->mountpoint;
 
-        root => \%constructor_args
-        root => $path_to_root
+    Path to where the filesystem should be mounted.
 
-       %constructor_args can override defaults, while $path_to_root will only
-       override "path" attribute in root-object.
+  mountopts
+     $str = $self->mountopts;
 
-   mmoouunnttppooiinntt
-        $path = $self->mountpoint;
+    Example mount option: "allow_other"
 
-       Path to where the filesystem should be mounted.
+  schema
+     $dbic_object = $self->schema;
 
-   mmoouunnttooppttss
-        $str = $self->mountopts;
+    Can be set in constructor as:
 
-       Example mount option: "allow_other"
+     schema => \%args
+     schema => "$dsn $username $password"
 
-   sscchheemmaa
-        $dbic_object = $self->schema;
+    See Fuse::Template::Schema for details.
 
-       Can be set in constructor as:
+  debug
+     $bool = $self->debug;
 
-        schema => \%args
-        schema => "$dsn $username $password"
+    Enable/disable debug output from Fuse. Default is disabled.
 
-       See Fuse::Template::Schema for details.
+METHODS
+  find_file
+     $real_path = $self->find_file($virtual_path);
 
-   ddeebbuugg
-        $bool = $self->debug;
+    Returns path to the file in root path.
 
-       Enable/disable debug output from Fuse. Default is disabled.
+  log
+     $bool = $self->log($level => $format => @args);
 
-MMEETTHHOODDSS
-   ffiinndd__ffiillee
-        $real_path = $self->find_file($virtual_path);
+AUTHOR
+    Jan Henning Thorsen
 
-       Returns path to the file in root path.
+LICENSE
+    This library is free software, you can redistribute it and/or modify it
+    under the same terms as Perl itself.
 
-   lloogg
-        $bool = $self->log($level => $format => @args);
-
-AAUUTTHHOORR
-       Jan Henning Thorsen
-
-LLIICCEENNSSEE
-       This library is free software, you can redistribute it and/or modify it
-       under the same terms as Perl itself.
-
-
-
-perl v5.10.0                      2009-07-27         .::lib::Fuse::Template(3)

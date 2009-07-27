@@ -23,7 +23,6 @@ use POSIX qw(
     EROFS ENOENT ENOSYS EEXIST EPERM
 );
 
-
 require 'syscall.ph'; # for SYS_mknod and SYS_lchown
 
 requires qw/find_file log/;
@@ -34,16 +33,17 @@ requires qw/find_file log/;
 
  $root_obj = $self->root;
 
-Required.
-
 =cut
 
 has root => (
     is => 'ro',
     isa => RootObject,
     coerce => 1,
-    required => 1,
+    documentation => "Location to template files",
+    #required => 1,
 );
+
+=head1 METHODS
 
 =head2 getattr
 

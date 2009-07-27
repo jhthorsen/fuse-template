@@ -64,8 +64,6 @@ See L<DBIx::Class::Schema::Loader/moniker_map> for details
 use Moose;
 use Fuse::Template::Schema qw/Schema/;
 use Fuse::Template::TT;
-use threads;
-use threads::shared;
 
 with qw/Fuse::Template::Sys/;
 
@@ -97,7 +95,8 @@ Path to where the filesystem should be mounted.
 has mountpoint => (
     is => 'ro',
     isa => 'Str',
-    required => 1,
+    documentation => 'Path to mount point',
+    #required => 1,
 );
 
 =head2 mountopts
@@ -111,7 +110,7 @@ Example mount option: "allow_other"
 has mountopts => (
     is => 'ro',
     isa => 'Str',
-    default => '',
+    documentation => 'Mount options. Example: "allow_other"',
 );
 
 =head2 schema
@@ -131,6 +130,7 @@ has schema => (
     is => 'ro',
     isa => Schema,
     coerce => 1,
+    documentation => 'Schema name or dsn. --schema help for details',
 );
 
 =head2 debug
@@ -145,6 +145,7 @@ has debug => (
     is => 'ro',
     isa => 'Bool',
     default => 0,
+    documentation => 'Enable/disable debug output',
 );
 
 has _template => (
@@ -171,35 +172,6 @@ sub _build__template {
 }
 
 =head1 METHODS
-
-=head2 run
-
- $exit_code = $self->run;
-
-Starts L<Fuse>'s mainloop.
-
-=cut
-
-sub run {
-    my $self = shift;
-    my %callbacks;
-
-    for my $method (Fuse::Template::Sys->meta->get_method_list) {
-        $callbacks{$method} = sub { $self->$method(@_) };
-    }
-
-    $self->log(info => "Starting Fuse mainloop");
-
-    Fuse::main(
-        %callbacks,
-        mountpoint => $self->mountpoint,
-        debug      => $self->debug,
-        mountopts  => $self->mountopts,
-        threaded   => 1,
-    );
-
-    return 0;
-}
 
 =head2 find_file
 

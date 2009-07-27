@@ -1,3 +1,10 @@
 #!/usr/bin/perl
+
 use Fuse::Template;
-exit Fuse::Template->new_with_options->run;
+use Moose::Util;
+
+my $fuse = Fuse::Template->new;
+
+Moose::Util::apply_all_roles($fuse, qw/Fuse::Template::App/);
+
+exit $fuse->new_with_options->run;

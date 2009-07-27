@@ -3,8 +3,6 @@
 use Fuse::Template;
 use Moose::Util;
 
-my $fuse = Fuse::Template->new;
+Moose::Util::apply_all_roles('Fuse::Template' => qw/Fuse::Template::App/);
 
-Moose::Util::apply_all_roles($fuse, qw/Fuse::Template::App/);
-
-exit $fuse->new_with_options->run;
+exit Fuse::Template->new_with_options->run;

@@ -12,18 +12,10 @@ Documentation is mainly copy/paste from L<Fuse>.
 
 =cut
 
-use Fuse ':all';
 use Moose::Role;
 use Fuse::Template::Root qw/RootObject/;
-use Fcntl qw(
-    S_ISBLK S_ISCHR S_ISFIFO SEEK_SET
-    O_RDONLY O_WRONLY O_RDWR O_APPEND O_CREAT
-);
-use POSIX qw(
-    EROFS ENOENT ENOSYS EEXIST EPERM
-);
-
-require 'syscall.ph'; # for SYS_mknod and SYS_lchown
+use Fuse ();
+use POSIX ();
 
 requires qw/find_file log/;
 
@@ -58,15 +50,16 @@ sub getattr {
     my $vfile = shift;
     my $file  = $self->find_file($vfile);
     my $root  = $self->root;
-    my @stat;
 
-    $self->log(info => "Getattr %s", $vfile);
+    $self->log(debug => "getattr(%s)", $file);
 
-    if($file eq $root->path) {
-        @stat = (
+    return -&POSIX::ENOENT unless($file); # such file or directory
+
+    if(length $vfile <= 1) {
+        return (
             0,                #  0 device number
             0,                #  1 inode number
-            $root->mode,      #  2 file mode 
+            (0040 << 9) + $root->mode, #  2 file mode 
             1,                #  3 number of hard links
             $root->uid,       #  4 user id
             $root->gid,       #  5 group id
@@ -80,11 +73,10 @@ sub getattr {
         );
     }
     else {
-        @stat = lstat $file;
+        my @stat = lstat $file;
+        return -$! unless @stat;
+        return @stat;
     }
-
-    return -$! unless @stat;
-    return @stat;
 }
 
 =head2 readlink
@@ -100,7 +92,7 @@ sub readlink {
     my $vfile = shift;
     my $file  = $self->find_file($vfile);
 
-    $self->log(info => "Readlink $vfile");
+    $self->log(debug => "readlink(%s)", $file);
 
     return readlink $file;
 }
@@ -122,9 +114,9 @@ sub getdir {
     my $dir  = $self->find_file($vdir);
     my($DH, @files);
 
-    $self->log(info => "Getdir $vdir");
+    $self->log(debug => "getdir(%s)", $dir);
 
-    opendir($DH, $dir) or return -ENOENT();
+    opendir($DH, $dir) or return -&POSIX::ENOENT;
     @files = readdir $DH;
 
     return @files, 0;
@@ -134,7 +126,7 @@ sub getdir {
 
  $errno = $self->mknod($virtual_path);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 This function is called for all non-directory, non-symlink nodes, not
@@ -144,14 +136,15 @@ just devices.
 
 sub mknod {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "mknod => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 mkdir
 
  $errno = $self->mkdir($virtual_path, $mode);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to create a directory.
@@ -160,14 +153,15 @@ Called to create a directory.
 
 sub mkdir {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "mkdir => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 unlink
 
  $errno = $self->unlink($virtual_path);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to remove a file, device, or symlink.
@@ -176,14 +170,15 @@ Called to remove a file, device, or symlink.
 
 sub unlink {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "unlink => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 rmdir
 
  $errno = $self->rmdir($virtual_path);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to remove a directory.
@@ -192,14 +187,15 @@ Called to remove a directory.
 
 sub rmdir {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "rmdir => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 symlink
 
  $errno = $self->symlink($virtual_path, $symlink_name);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to create a symbolic link.
@@ -208,14 +204,15 @@ Called to create a symbolic link.
 
 sub symlink {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "symlink => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 rename
 
  $errno = $self->rmdir($old_virtual_path, $new_virtual_path);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to rename a file, and/or move a file from one directory to another.
@@ -224,14 +221,15 @@ Called to rename a file, and/or move a file from one directory to another.
 
 sub rename {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "rename => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 link
 
  $errno = $self->link($virtual_path, $hardlink_name);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to create hard links.
@@ -240,14 +238,15 @@ Called to create hard links.
 
 sub link {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "link => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 chmod
 
  $errno = $self->chmod($virtual_path, $mode);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to change permissions on a file/directory/device/symlink.
@@ -256,14 +255,15 @@ Called to change permissions on a file/directory/device/symlink.
 
 sub chmod {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "chmod => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 chown
 
  $errno = $self->chown($virtual_path, $uid, $gid);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to change ownership of a file/directory/device/symlink.
@@ -272,14 +272,15 @@ Called to change ownership of a file/directory/device/symlink.
 
 sub chown {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "chown => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 truncate
 
  $errno = $self->truncate($virtual_path, $offset);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented. 
 
 Called to truncate a file, at the given offset.
@@ -288,14 +289,15 @@ Called to truncate a file, at the given offset.
 
 sub truncate {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "truncate => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 utime
 
  $errno = $self->utime($virtual_path, $actime, $modtime);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called to change access/modification times for a
@@ -305,7 +307,8 @@ file/directory/device/symlink.
 
 sub utime {
     my $self = shift;
-    return -EROFS(); # cannot write
+    $self->log(error => "utime => ro");
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head2 open
@@ -322,7 +325,7 @@ sub open {
     my $mode  = shift;
     my $file  = $self->find_file($vfile);
 
-    $self->log(info => "open($vfile)");
+    $self->log(debug => 'open(%s, %s)', $file, $mode);
 
     return -$! unless(sysopen my $FH, $file, $mode);
     return 0;
@@ -347,15 +350,15 @@ sub read {
     my $size    = -s $file;
     my($FH, $buf);
 
-    $self->log(info => "Read $vfile");
+    $self->log(debug => 'read(%s, %i, %i)', $file, $bufsize, $offset);
 
     # check for file existence
-    return -ENOENT() unless(defined $size);
+    return -&POSIX::ENOENT() unless(defined $size);
 
     # open and read file
-    sysopen $FH, $file, O_RDONLY   or return -ENOSYS();
-    sysseek $FH, $offset, SEEK_SET or return -ENOSYS();
-    sysread $FH, $buf, $bufsize    or return -ENOSYS();
+    sysopen $FH, $file, POSIX::O_RDONLY   or return -&POSIX::ENOSYS;
+    sysseek $FH, $offset, POSIX::SEEK_SET or return -&POSIX::ENOSYS;
+    sysread $FH, $buf, $bufsize    or return -&POSIX::ENOSYS;
 
     return $buf;
 }
@@ -366,7 +369,7 @@ sub read {
 
 C<$ret> can be either C<$errno> or length of data read.
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 Called in an attempt to write (or overwrite) a portion of the file.
@@ -377,7 +380,8 @@ Called in an attempt to write (or overwrite) a portion of the file.
 # NULLs and all sorts of other wonderful stuff.
 sub write {
     my $self = shift;
-    return -EROFS();
+    $self->log(error => 'write => ro');
+    return -&POSIX::EROFS;
 }
 
 =head2 statfs
@@ -424,6 +428,7 @@ is closed. It may be called multiple times before a file is closed.
 sub flush {
     my $self  = shift;
     my $vfile = shift;
+    $self->log(debug => 'flush...');
     return 0;
 }
 
@@ -441,6 +446,7 @@ sub release {
     my $self  = shift;
     my $vfile = shift;
     my $flags = shift;
+    $self->log(debug => 'release...');
     return 0;
 }
 
@@ -457,6 +463,7 @@ sub fsync {
     my $self  = shift;
     my $vfile = shift;
     my $flags = shift;
+    $self->log(debug => 'fsync...');
     return 1;
 }
 
@@ -479,9 +486,11 @@ sub setxattr {
     my $value = shift;
     my $flags = shift; # OR-ing of XATTR_CREATE and XATTR_REPLACE
 
-    $self->log(debug => "setxattr $vfile");
+    $self->log(debug => 'setxattr(%s, %s, %s, %s)',
+        $vfile, $name, $value, $flags,
+    );
 
-    return -EOPNOTSUPP();
+    return -&POSIX::EOPNOTSUPP();
 }
 
 =head2 getxattr
@@ -500,6 +509,8 @@ sub getxattr {
     my $vfile = shift;
     my $name  = shift;
     my $value;
+
+    $self->log(debug => 'getxattr(%s, %s)', $vfile, $name);
  
     return $value if($value);
     return 0; # no such name
@@ -515,6 +526,7 @@ Called to get the value of the named extended attribute.
 
 sub listxattr {
     my $self = shift;
+    $self->log(debug => 'listxattr...');
     return 0;
 }
 
@@ -522,7 +534,7 @@ sub listxattr {
 
  $errno = $self->removexattr($virtual_path, $attr_name);
 
-This method will always return C<-EROFS()>, since write support is not
+This method will always return C<-&POSIX::EROFS>, since write support is not
 implemented.
 
 =cut
@@ -531,7 +543,8 @@ sub removexattr {
     my $self  = shift;
     my $vfile = shift;
     my $name  = shift;
-    return -EROFS(); # cannot write
+    $self->log(debug => 'removexattr => ro');
+    return -&POSIX::EROFS; # cannot write
 }
 
 =head1 AUTHOR

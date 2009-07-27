@@ -21,7 +21,7 @@ my $obj = Fuse::Template->new(
 is($obj->root, $root, "root path");
 
 my @stat = $obj->getattr('/');
-is($stat[2], 16877, "root mode");
+is($stat[2], 16893, "root mode");
 is($stat[7], 4096, "root size");
 
 ok(!$obj->readlink('foo'), "foo is not a link");

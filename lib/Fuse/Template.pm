@@ -4,6 +4,10 @@ package Fuse::Template;
 
 Fuse::Template - Mount a directory with templates.
 
+=head1 VERSION
+
+0.01
+
 =head1 USAGE
 
 C<sudo> might be optional.
@@ -96,6 +100,8 @@ use Fuse::Template::Schema qw/Schema/;
 use Fuse::Template::TT;
 
 with qw/Fuse::Template::Sys/;
+
+our $VERSION = "0.01";
 
 =head1 ATTRIBUTES
 

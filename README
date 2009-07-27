@@ -5,6 +5,9 @@
 NNAAMMEE
        Fuse::Template - Mount a directory with templates.
 
+VVEERRSSIIOONN
+       0.01
+
 UUSSAAGGEE
        "sudo" might be optional.
 

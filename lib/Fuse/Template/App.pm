@@ -13,6 +13,13 @@ use threads::shared;
 
 with 'MooseX::Getopt';
 
+MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
+    Fuse::Template::Root::RootObject, '=s'
+);
+MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
+    Fuse::Template::Schema::Schema, '=s'
+);
+
 =head1 ATTRIBUTES
 
 =head2 help
@@ -57,7 +64,7 @@ sub run {
         exit 0;
     }
     elsif($self->man) {
-        exec perldoc => map { $INC{$_} } grep { $_ eq 'Fuse/Template.pm' } keys %INC;
+        exec perldoc => grep { m[ Fuse/Template.pm$ ]x } values %INC;
     }
 
     for my $method (Fuse::Template::Sys->meta->get_method_list) {
@@ -69,9 +76,9 @@ sub run {
     Fuse::main(
         %callbacks,
         mountpoint => $self->mountpoint,
-        debug      => $self->debug,
-        mountopts  => $self->mountopts,
-        threaded   => 1,
+        debug      => $self->debug || 0,
+        mountopts  => $self->mountopts || q(),
+        threaded   => 0,
     );
 
     return 0;

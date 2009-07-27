@@ -51,14 +51,15 @@ coerce Schema, (
 sub from_string {
     my $input = $_;
 
-    if($input =~ /([\w:]+)\s(.*)/) {
+    if($input =~ /^(dbi:.*)/) {
+        return __PACKAGE__->connect(split /\s+/, $input);
+    }
+    elsif($input =~ /([\w:]+)\s(.*)/) {
         my $class = $1;
         my $dsn   = $2; # "$dsn $username $password";
-        eval "require $class" or confess $@;
-        return $class->connect(split /\s+/, $dsn);
-    }
-    elsif($input) {
-        return __PACKAGE__->connect(split /\s+/, $input);
+        if(eval "require $class") {
+            return $class->connect(split /\s+/, $dsn);
+        }
     }
     else {
         confess "invalid arguments";

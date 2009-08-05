@@ -3,6 +3,13 @@
 use Fuse::Template;
 use Moose::Util;
 
+BEGIN {
+    eval {
+        use threads;
+        use threads::shared;
+    };
+}
+
 Moose::Util::apply_all_roles('Fuse::Template' => qw/Fuse::Template::App/);
 
 exit Fuse::Template->new_with_options->run;

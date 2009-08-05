@@ -8,8 +8,6 @@ Fuse::Template::App - Application role for fuse-template
 
 use Moose::Role;
 use Fuse;
-use threads;
-use threads::shared;
 
 with 'MooseX::Getopt';
 
@@ -67,6 +65,11 @@ sub run {
         exec perldoc => grep { m[ Fuse/Template.pm$ ]x } values %INC;
     }
 
+    unless($self->mountpoint and $self->root) {
+        warn "usage: fuse-template --help\n\n";
+        return 0;
+    }
+
     for my $method (Fuse::Template::Sys->meta->get_method_list) {
         $callbacks{$method} = sub { $self->$method(@_) };
     }
@@ -81,6 +84,11 @@ sub run {
         threaded   => 0,
     );
 
+    return 0;
+}
+
+sub _threads_enabled {
+    return 1 if(grep { $_ eq 'threads.pm' } keys %INC);
     return 0;
 }
 

@@ -1,10 +1,2 @@
-Install Fuse.pm, using aptitude/apt-get:
+# Install these two deps first, if you're in ubuntu/debian/...
 $ aptitude install libfuse-perl libdbix-class-schema-loader-perl
-
-DBIx::Schema might need to be installed manually:
-$ wget 'http://search.cpan.org/CPAN/authors/id/J/JM/JMAC/DBIx-Schema-0.07.tar.gz'
-$ tar xfz DBIx-Schema-0.07.tar.gz
-$ cd DBIx-Schema-0.07
-$ perl Makefile.PL
-# press enter on all questions
-$ make install

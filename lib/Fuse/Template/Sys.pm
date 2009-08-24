@@ -357,8 +357,8 @@ sub read {
     return -&POSIX::ENOENT() unless(defined $size);
 
     # open and read file
-    sysopen $FH, $file, POSIX::O_RDONLY   or return -&POSIX::ENOSYS;
-    sysseek $FH, $offset, POSIX::SEEK_SET or return -&POSIX::ENOSYS;
+    sysopen $FH, $file, &POSIX::O_RDONLY   or return -&POSIX::ENOSYS;
+    sysseek $FH, $offset, &POSIX::SEEK_SET or return -&POSIX::ENOSYS;
     sysread $FH, $buf, $bufsize    or return -&POSIX::ENOSYS;
 
     return $buf;

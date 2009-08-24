@@ -6,7 +6,7 @@ Fuse::Template - Mount a directory with templates.
 
 =head1 VERSION
 
-0.01
+0.01_002
 
 =head1 USAGE
 
@@ -72,7 +72,8 @@ Here is an example template:
  col_name = [% row.col_name # retrieve column data %]
  [% END %]
 
-See L<DBIx::Class> for information on how to use the L<schema> object.
+See L<DBIx::Class> for information on how to use the L<schema> object, and
+L<DBIx::Class::Resultset> on how to select data and more...
 
 Available variables:
 
@@ -101,7 +102,7 @@ use Fuse::Template::TT;
 
 with qw/Fuse::Template::Sys/;
 
-our $VERSION = "0.01";
+our $VERSION = "0.01_002";
 
 =head1 ATTRIBUTES
 

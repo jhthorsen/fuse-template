@@ -213,6 +213,7 @@ sub _build__template {
             mountpoint => $self->mountpoint,
             mountopts => $self->mountopts,
             self => $self,
+            ft => $self,
         },
     );
 }

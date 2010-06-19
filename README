@@ -2,7 +2,7 @@ NAME
     Fuse::Template - Mount a directory with templates.
 
 VERSION
-    0.02
+    0.0201
 
 USAGE
     "sudo" might be optional.

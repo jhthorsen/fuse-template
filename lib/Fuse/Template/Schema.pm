@@ -2,7 +2,7 @@ package Fuse::Template::Schema;
 
 =head1 NAME
 
-Fuse::Template::Schema
+Fuse::Template::Schema - Dynamic load of database schema
 
 =head1 DESCRIPTION
 

@@ -2,7 +2,7 @@ package Fuse::Template::Root;
 
 =head1 NAME
 
-Fuse::Template::Root
+Fuse::Template::Root - Root filesystem object
 
 =head1 SYNOPSIS
 

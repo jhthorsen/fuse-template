@@ -1,5 +1,9 @@
 Revision history for Fuse-Template
 
+0.0201   Sat Jun 19 13:49:36 CEST 2010
+       * Forgot to update Makefile.PL
+       * Add auto install of bin/fuse-template
+
 0.02     Sat Jun 19 13:37:00 CEST 2010
        * Fix dependencies
        * Add "ft" is alias for "self" in templates

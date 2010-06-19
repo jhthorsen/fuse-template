@@ -2,7 +2,7 @@ NAME
     Fuse::Template - Mount a directory with templates.
 
 VERSION
-    0.01
+    0.02
 
 USAGE
     "sudo" might be optional.
@@ -32,11 +32,13 @@ USAGE
      sudo umount /path/to/mountpoint;
 
 DESCRIPTION
+    IMPORTANT! Version 0.02 of Fuse::Template breaks backward compat by
+    using the new "v7" naming convention from DBIx::Class::Schema::Loader.
+    Set the "SCHEMA_LOADER_BACKCOMPAT" environment variable, if you want the
+    old behavior.
+
     The idea with this project is to auto-maintain password files, and other
     plain text files for different systems, with data from a database.
-
-    Got issues with installation? See "INSTALL" for details and list of
-    prerequisite.
 
     See "examples/" in this distribution for templates.
 
@@ -63,7 +65,8 @@ TEMPLATES
      col_name = [% row.col_name # retrieve column data %]
      [% END %]
 
-    See DBIx::Class for information on how to use the schema object.
+    See DBIx::Class for information on how to use the schema object, and
+    DBIx::Class::Resultset on how to select data and more...
 
     Available variables:
 
@@ -83,6 +86,14 @@ TEMPLATES
         luser-opts  | LuserOpts
 
     See "moniker_map" in DBIx::Class::Schema::Loader for details
+
+INSTALLATION
+    On ubuntu:
+
+        $ sudo aptitude install libfuse-perl
+        $ wget -q http://xrl.us/cpanm | perl - --sudo Fuse::Template
+
+    See App::cpanminus if you are curious about the "wget" command.
 
 ATTRIBUTES
   root

@@ -6,7 +6,7 @@ Fuse::Template - Mount a directory with templates.
 
 =head1 VERSION
 
-0.01_002
+0.02
 
 =head1 USAGE
 
@@ -113,7 +113,7 @@ use Fuse::Template::TT;
 
 with qw/Fuse::Template::Sys/;
 
-our $VERSION = "0.01_002";
+our $VERSION = '0.02';
 
 =head1 ATTRIBUTES
 

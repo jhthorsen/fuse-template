@@ -1,14 +1,19 @@
 Revision history for Fuse-Template
 
-0.02
+0.02     Sat Jun 19 13:37:00 CEST 2010
        * Fix dependencies
-       * Updated tests
+       * Add "ft" is alias for "self" in templates
+       * Add more documentation
+       * Change default values for gid() and uid()
+       * Break backward compat: naming conventions for database results
+         (tables) and columns default to "v7". (see
+         http://search.cpan.org/dist/DBIx-Class-Schema-Loader/lib/DBIx/Class/Schema/Loader/Base.pm#naming
+         for details)
 
 
 0.01     Mon Jul 27 22:24:00 CET 2009
        * Add support for mount ro filesystem
        * Add support for templates
        * Add can read data from schema
-         - Dynamic database schema load with
-           DBIx::Class::Schema::Loader
+         - Dynamic database schema load with DBIx::Class::Schema::Loader
 

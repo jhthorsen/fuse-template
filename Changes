@@ -1,7 +1,14 @@
 Revision history for Fuse-Template
 
-0.01 Mon Jul 27 22:24:00 CET 2009
-   * fuse-template can mount ro filesystem
-   * template support works
-   * can read data from schema
+0.02
+       * Fix dependencies
+       * Updated tests
+
+
+0.01     Mon Jul 27 22:24:00 CET 2009
+       * Add support for mount ro filesystem
+       * Add support for templates
+       * Add can read data from schema
+         - Dynamic database schema load with
+           DBIx::Class::Schema::Loader
 

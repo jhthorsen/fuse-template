@@ -93,14 +93,14 @@ has uid => (
 =head2 gid
 
 The group id of who owns the target mount path. Defaults to
-C<$REAL_GROUP_ID>.
+the first integer from C<$REAL_GROUP_ID>.
 
 =cut
 
 has gid => (
     is => 'ro',
     isa => 'Int',
-    default => $(,
+    default => sub { $( =~ /(\d+)/ },
 );
 
 =head2 ctime

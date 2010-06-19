@@ -6,10 +6,28 @@ Fuse::Template::Root
 
 =head1 SYNOPSIS
 
- # will import RootObject typeconstraint
- use Fuse::Template::Root qw/RootObject/;
- has foo => ( isa => RootObject, coerce => 1 );
- ...
+    package Class;
+    # will import RootObject typeconstraint
+    use Fuse::Template::Root qw/RootObject/;
+    has foo => ( isa => RootObject, coerce => 1 );
+    ...
+
+    package main;
+
+    # same result:
+    my $obj = Class->new( foo => { path => $some_root } );
+    my $obj = Class->new( foo => $some_root );
+    my $obj = Class->new(
+                  foo => Fuse::Template::Root->new({
+                      path => $some_root
+                  }),
+              );
+
+=head1 DESCRIPTION
+
+The C<RootObject> can coerce either Str and HashRef into a
+L<Fuse::Template::Root> object. The HashRef will be used as object
+constructor, while the Str will be set as L</path> attribute.
 
 =cut
 
@@ -24,11 +42,12 @@ coerce RootObject, (
     from HashRef, via { Fuse::Template::Root->new($_) },
 );
 
-=head1 ATTIBUTES
+=head1 ATTRIBUTES
 
 =head2 path
 
- $path = $self->path;
+Holds a string representing the path to where the template files
+exist. This attribute is required.
 
 =cut
 
@@ -40,7 +59,8 @@ has path => (
 
 =head2 mode
 
- $int = $self->mode;
+Holds the file mode for the target mount directory. Default value
+is C<0775>. (octal value)
 
 =cut
 
@@ -54,41 +74,39 @@ around mode => sub {
     my $next = shift;
     my $self = shift;
 
-    if(@_) {
-        return $self->$next((0040 << 9) + $_[0]);
-    }
-    else {
-        return $self->$next;
-    }
+    return @_ ? $self->$next((0040 << 9) + $_[0]) : $self->$next;
 };
 
 =head2 uid
 
- $int = $self->uid;
+The user id of who owns the target mount path. Defaults to the
+C<$REAL_USER_ID>
 
 =cut
 
 has uid => (
     is => 'ro',
     isa => 'Int',
-    default => 0,
+    default => $<,
 );
 
 =head2 gid
 
- $int = $self->gid;
+The group id of who owns the target mount path. Defaults to
+C<$REAL_GROUP_ID>.
 
 =cut
 
 has gid => (
     is => 'ro',
     isa => 'Int',
-    default => 0,
+    default => $(,
 );
 
 =head2 ctime
 
- $int = $self->ctime;
+Last change time of the target mount path. Defaults to
+C<time> when the object got created.
 
 =cut
 
@@ -100,7 +118,8 @@ has ctime => (
 
 =head2 mtime
 
- $int = $self->mtime;
+Last modify time of the target mount path. Defaults to
+C<time> when the object got created.
 
 =cut
 
@@ -112,7 +131,8 @@ has mtime => (
 
 =head2 atime
 
- $int = $self->atime;
+Last access time of the target mount path. Defaults to
+C<time> when the object got created.
 
 =cut
 
@@ -124,7 +144,8 @@ has atime => (
 
 =head2 block_size
 
- $int = $self->block_size;
+Preferred block size for file system I/O. Defaults to 1024.
+(The default value might change)
 
 =cut
 

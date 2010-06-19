@@ -10,6 +10,9 @@ This role requires C<find_file()> and C<log()>.
 
 Documentation is mainly copy/paste from L<Fuse>.
 
+It should be possible to use this role in other projects as well.
+I might even seperate it out as a standalone distribution some day.
+
 =cut
 
 use Moose::Role;
@@ -23,7 +26,7 @@ requires qw/find_file log/;
 
 =head2 root
 
- $root_obj = $self->root;
+Holds a L<Fuse::Template::Root> object.
 
 =cut
 

@@ -43,9 +43,6 @@ This needs to be done manually for now. (Patches are welcome!)
 The idea with this project is to auto-maintain password files, and other
 plain text files for different systems, with data from a database.
 
-Got issues with installation? See C<INSTALL> for details and list
-of prerequisite.
-
 See C<examples/> in this distribution for templates.
 
 Example file system structure:
@@ -93,6 +90,15 @@ Resultset use this naming convention to convert tablenames:
     luser-opts  | LuserOpts
 
 See L<DBIx::Class::Schema::Loader/moniker_map> for details
+
+=head1 INSTALLATION
+
+On ubuntu:
+
+    $ sudo aptitude install libfuse-perl
+    $ wget -q http://xrl.us/cpanm | perl - --sudo Fuse::Template
+
+See L<App::cpanminus> if you are curious about the "wget" command.
 
 =cut
 

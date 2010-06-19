@@ -4,6 +4,10 @@ package Fuse::Template::App;
 
 Fuse::Template::App - Application role for fuse-template
 
+=head1 SYNOPSIS
+
+See C<bin/fuse-template> for example.
+
 =cut
 
 use Moose::Role;
@@ -22,7 +26,8 @@ MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
 
 =head2 help
 
- $bool = $self->help;
+Provides "--help", which again prints a list of command line
+options.
 
 =cut
 
@@ -34,7 +39,7 @@ has help => (
 
 =head2 man
 
- $bool = $self->man;
+Provides "--man", which will run perldoc on L<Fuse::Template>.
 
 =cut
 
@@ -48,9 +53,7 @@ has man => (
 
 =head2 run
 
- $exit_code = $self->run;
-
-Starts L<Fuse>'s mainloop.
+Set up objects and starts the L<Fuse> mainloop.
 
 =cut
 
@@ -66,8 +69,8 @@ sub run {
     }
 
     unless($self->mountpoint and $self->root) {
-        warn "usage: fuse-template --help\n\n";
-        return 0;
+        warn "Usage: fuse-template --help\n\n";
+        return 1;
     }
 
     for my $method (Fuse::Template::Sys->meta->get_method_list) {

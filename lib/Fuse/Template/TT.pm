@@ -13,7 +13,7 @@ use Template;
 
 =head2 vars
 
- $hash_ref = $self->vars;
+Holds a hash ref with the variables which is available in the template.
 
 =cut
 
@@ -25,7 +25,8 @@ has vars => (
 
 =head2 paths
 
- $array_ref = $self->paths;
+Holds an array ref with paths to where L<Template::Toolkit> will look
+for templates.
 
 =cut
 
@@ -38,45 +39,40 @@ has paths => (
 has _template => (
     is => 'ro',
     isa => 'Object',
-    required => 1,
+    lazy_build => 1,
     handles => [qw/process error/],
 );
 
-=head1 METHODS
-
-=head2 BUILDARGS
-
- $hash_ref = $self->BUILDARGS(%args);
-
-=cut
-
-sub BUILDARGS {
-    my $self = shift;
-    my $args = ref $_[0] eq 'HASH' ? $_[0] : {@_};
-
-    $args->{'_template'} = Template->new(
-        INCLUDE_PATH => $args->{'include_path'} || $args->{'paths'},
-        EVAL_PERL => $args->{'eval_perl'} || 0,
-        TEMPLATE_EXTENSION => $args->{'template_exension'} || 'tt',
+sub _build__template {
+    return Template->new(
+        INCLUDE_PATH => $_[0]->paths,
+        EVAL_PERL => 0,
+        TEMPLATE_EXTENSION => 'tt',
     );
-
-    return $args;
 }
+
+=head1 METHODS
 
 =head2 render
 
- $output = $self->render($virtual_file);
+    $text = $self->render($vfile);
+
+Will return the output from a processed template. The C<$vfile> points
+to a template relative to one of the L</paths>. It cannot start with "/".
+
+C<$text> will hold the error message if templat toolkit fail to render
+the template.
 
 =cut
 
 sub render {
-    my $self  = shift;
+    my $self = shift;
     my $vfile = shift;
-    my $output;
+    my $text;
     
-    $self->process($vfile, $self->vars, \$output);
+    $self->process($vfile, $self->vars, \$text);
 
-    return $output ? $output : $self->error;
+    return $text ? $text : $self->error;
 }
 
 =head2 process

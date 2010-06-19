@@ -38,6 +38,13 @@ coerce Schema, (
     from HashRef, via { &from_hashref },
 );
 
+unless($ENV{'SCHEMA_LOADER_BACKCOMPAT'}) {
+    __PACKAGE__->loader_options(
+        naming => 'v7',
+        use_namespaces => 1,
+    );
+}
+
 =head1 FUNCTIONS
 
 =head2 from_string

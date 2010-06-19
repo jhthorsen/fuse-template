@@ -1,2 +1,2 @@
 root = [% root %]
-names = [[% Users.get_column('username').all.join(",") %]]
+names = [[% User.get_column('username').all.join(",") %]]

@@ -40,6 +40,11 @@ This needs to be done manually for now. (Patches are welcome!)
 
 =head1 DESCRIPTION
 
+IMPORTANT! Version 0.02 of L<Fuse::Template> breaks backward compat by
+using the new "v7" naming convention from L<DBIx::Class::Schema::Loader>.
+Set the C<SCHEMA_LOADER_BACKCOMPAT> environment variable, if you want the
+old behavior.
+
 The idea with this project is to auto-maintain password files, and other
 plain text files for different systems, with data from a database.
 
